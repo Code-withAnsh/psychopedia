@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -21,6 +22,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="pdf-container">
         <canvas id="pdf-canvas"></canvas>
@@ -40,22 +42,33 @@
             pageNum = 1,
             pageRendering = false,
             pageNumPending = null,
-            scale = 0.5,
             canvas = document.getElementById('pdf-canvas'),
             ctx = canvas.getContext('2d');
 
         function renderPage(num) {
             pageRendering = true;
             pdfDoc.getPage(num).then(function(page) {
-                const viewport = page.getViewport({ scale: scale });
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+                const viewport = page.getViewport({ scale: 1 });
+                const containerWidth = document.getElementById('pdf-container').clientWidth;
+                const scale = containerWidth / viewport.width;
+
+                const scaledViewport = page.getViewport({ scale: scale });
+                const outputScale = window.devicePixelRatio || 1;
+
+                // Set higher resolution for canvas
+                canvas.width = scaledViewport.width * outputScale;
+                canvas.height = scaledViewport.height * outputScale;
+                canvas.style.width = ${scaledViewport.width}px;
+                canvas.style.height = ${scaledViewport.height}px;
+
                 const renderContext = {
                     canvasContext: ctx,
-                    viewport: viewport
+                    viewport: scaledViewport,
+                    transform: [outputScale, 0, 0, outputScale, 0, 0]  // Apply scale transformation
                 };
+
                 const renderTask = page.render(renderContext);
-                renderTask.promise.then(function() {
+                renderTask.promise.then(function () {
                     pageRendering = false;
                     if (pageNumPending !== null) {
                         renderPage(pageNumPending);
@@ -101,4 +114,5 @@
         });
     </script>
 </body>
+
 </html>
