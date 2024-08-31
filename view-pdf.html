@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View PDF</title>
+    <!-- Include PDF.js Library -->
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <style>
         body {
             margin: 0;
@@ -14,28 +16,47 @@
             height: 100vh;
             background-color: #f0f0f0;
         }
-
-        .pdf-viewer {
-            width: 90%;
-            height: 90%;
+        #pdf-viewer {
+            width: 80%;
+            height: 90vh;
             border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
-    <!-- Use an iframe to display the PDF -->
-    <iframe class="pdf-viewer" src="" frameborder="0"></iframe>
+    <!-- Canvas to Render PDF -->
+    <canvas id="pdf-viewer"></canvas>
 
     <script>
-        // Get the PDF URL from query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const pdfUrl = urlParams.get('url');
 
-        // Set the iframe source to the PDF URL
         if (pdfUrl) {
-            document.querySelector('.pdf-viewer').src = pdfUrl;
+            // PDF.js Library Initialization
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
+
+            // Loading the PDF
+            pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+                // Fetching First Page of PDF
+                pdf.getPage(1).then(function(page) {
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.getElementById('pdf-viewer');
+                    const context = canvas.getContext('2d');
+
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    // Rendering PDF Page into Canvas Context
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                });
+            });
         } else {
-            document.body.innerHTML = '<h2>PDF not found!</h2>';
+            document.body.innerHTML = '<h2>PDF not found! Please provide a valid URL.</h2>';
         }
     </script>
 </body>
