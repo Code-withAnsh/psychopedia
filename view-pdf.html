@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View PDF</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .pdf-viewer {
+            width: 90%;
+            height: 90%;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Use an iframe to display the PDF -->
+    <iframe class="pdf-viewer" src="" frameborder="0"></iframe>
+
+    <script>
+        // Get the PDF URL from query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const pdfUrl = urlParams.get('url');
+
+        // Set the iframe source to the PDF URL
+        if (pdfUrl) {
+            document.querySelector('.pdf-viewer').src = pdfUrl;
+        } else {
+            document.body.innerHTML = '<h2>PDF not found!</h2>';
+        }
+    </script>
+</body>
+</html>
