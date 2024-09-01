@@ -58,7 +58,7 @@
 </head>
 <body>
     <div id="pdfViewer">
-        <div class="controls">
+        <div class="controls" id="zoomControls" style="display: none;">
             <button id="zoomIn">Zoom In</button>
             <button id="zoomOut">Zoom Out</button>
         </div>
@@ -68,27 +68,40 @@
         const urlParams = new URLSearchParams(window.location.search);
         const pdfUrl = urlParams.get('url');
         let currentScale = 1; // Default scale
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); // Detect if the device is mobile
 
         if (pdfUrl) {
             const pdfViewer = document.getElementById('pdfViewer');
+            const zoomControls = document.getElementById('zoomControls');
+
+            // Show zoom controls only if not on a mobile device
+            if (!isMobile) {
+                zoomControls.style.display = 'flex';
+            } else {
+                // Allow pinch-to-zoom on mobile
+                document.body.style.overflow = 'auto';
+                pdfViewer.style.overflow = 'auto';
+            }
 
             // Loading the PDF.js library
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
 
             // Fetch the PDF
             pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-                renderPDF(pdf, currentScale);
+                const initialScale = isMobile ? 1 : currentScale; // Set scale based on device type
+                renderPDF(pdf, initialScale);
 
-                // Zoom In and Zoom Out functionality
-                document.getElementById('zoomIn').addEventListener('click', () => {
-                    currentScale += 0.2;
-                    renderPDF(pdf, currentScale);
-                });
+                if (!isMobile) { // Only add zoom functionality for desktop
+                    document.getElementById('zoomIn').addEventListener('click', () => {
+                        currentScale += 0.2;
+                        renderPDF(pdf, currentScale);
+                    });
 
-                document.getElementById('zoomOut').addEventListener('click', () => {
-                    currentScale = Math.max(currentScale - 0.2, 0.5);
-                    renderPDF(pdf, currentScale);
-                });
+                    document.getElementById('zoomOut').addEventListener('click', () => {
+                        currentScale = Math.max(currentScale - 0.2, 0.5);
+                        renderPDF(pdf, currentScale);
+                    });
+                }
             });
         } else {
             document.body.innerHTML = "<p>No PDF URL provided!</p>";
@@ -118,3 +131,4 @@
     </script>
 </body>
 </html>
+
