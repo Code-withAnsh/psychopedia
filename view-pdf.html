@@ -21,27 +21,53 @@
         }
 
         #pdfViewer {
-            width: 100%; /* Adjust the width */
-            height: 100%; /* Adjust the height */
+            width: 90%; /* Adjust the width */
+            height: 90%; /* Adjust the height */
             overflow: auto; /* Allow scrolling inside viewer */
             border: 1px solid #ddd; /* Optional: Add a light border */
             display: flex;
             flex-direction: column;
-            --viewer-pdf-sidenav-width:300px;
+            align-items: center;
+            background-color: white;
         }
 
         #pdfViewer canvas {
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .controls button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div id="pdfViewer"></div> <!-- PDF Viewer Container -->
+    <div id="pdfViewer">
+        <div class="controls">
+            <button id="zoomIn">Zoom In</button>
+            <button id="zoomOut">Zoom Out</button>
+        </div>
+    </div> <!-- PDF Viewer Container -->
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const pdfUrl = urlParams.get('url');
+        let currentScale = 1; // Default scale
 
         if (pdfUrl) {
             const pdfViewer = document.getElementById('pdfViewer');
@@ -51,24 +77,43 @@
 
             // Fetch the PDF
             pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-                // Loop through each page and render it
-                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-                    pdf.getPage(pageNumber).then(page => {
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
+                renderPDF(pdf, currentScale);
 
-                        const viewport = page.getViewport({ scale: 1.5 });
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
+                // Zoom In and Zoom Out functionality
+                document.getElementById('zoomIn').addEventListener('click', () => {
+                    currentScale += 0.2;
+                    renderPDF(pdf, currentScale);
+                });
 
-                        page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
-                            pdfViewer.appendChild(canvas);
-                        });
-                    });
-                }
+                document.getElementById('zoomOut').addEventListener('click', () => {
+                    currentScale = Math.max(currentScale - 0.2, 0.5);
+                    renderPDF(pdf, currentScale);
+                });
             });
         } else {
             document.body.innerHTML = "<p>No PDF URL provided!</p>";
+        }
+
+        function renderPDF(pdf, scale) {
+            // Clear previous canvases
+            const canvases = document.querySelectorAll('#pdfViewer canvas');
+            canvases.forEach(canvas => canvas.remove());
+
+            // Loop through each page and render it
+            for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+                pdf.getPage(pageNumber).then(page => {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+
+                    const viewport = page.getViewport({ scale: scale });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                        pdfViewer.appendChild(canvas);
+                    });
+                });
+            }
         }
     </script>
 </body>
