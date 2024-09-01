@@ -1,118 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Viewer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.279/pdf.min.js"></script>
+    <title>View PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <style>
-        #pdf-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f0f0f0;
-            padding: 20px;
+        #pdf-viewer {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            overflow-y: auto;
+            height: 90vh; /* Make sure it's scrollable */
+            border: 1px solid #ccc;
+            background: #eee;
+            padding: 10px;
         }
 
-        #pdf-canvas {
-            border: 1px solid black;
-            margin-bottom: 20px;
+        .pdf-page {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            background-color: white;
         }
     </style>
 </head>
-
 <body>
-    <div id="pdf-container">
-        <canvas id="pdf-canvas"></canvas>
-        <button id="prev-page">Previous Page</button>
-        <button id="next-page">Next Page</button>
-        <p>Page: <span id="page-num"></span> / <span id="page-count"></span></p>
-    </div>
+    <h1 style="text-align: center;">View PDF</h1>
+    <div id="pdf-viewer"></div>
 
     <script>
+        // PDF.js setup
         const urlParams = new URLSearchParams(window.location.search);
         const pdfUrl = urlParams.get('url');
 
         const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.0.279/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
 
-        let pdfDoc = null,
-            pageNum = 1,
-            pageRendering = false,
-            pageNumPending = null,
-            canvas = document.getElementById('pdf-canvas'),
-            ctx = canvas.getContext('2d');
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
 
-        function renderPage(num) {
-            pageRendering = true;
-            pdfDoc.getPage(num).then(function(page) {
-                const viewport = page.getViewport({ scale: 1 });
-                const containerWidth = document.getElementById('pdf-container').clientWidth;
-                const scale = containerWidth / viewport.width;
+        // Load the PDF
+        loadingTask.promise.then(function(pdf) {
+            const pdfViewer = document.getElementById('pdf-viewer');
 
-                const scaledViewport = page.getViewport({ scale: scale });
-                const outputScale = window.devicePixelRatio || 1;
+            // Loop through each page and render it
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                pdf.getPage(pageNum).then(function(page) {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.classList.add('pdf-page');
 
-                // Set higher resolution for canvas
-                canvas.width = scaledViewport.width * outputScale;
-                canvas.height = scaledViewport.height * outputScale;
-                canvas.style.width = ${scaledViewport.width}px;
-                canvas.style.height = ${scaledViewport.height}px;
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-                const renderContext = {
-                    canvasContext: ctx,
-                    viewport: scaledViewport,
-                    transform: [outputScale, 0, 0, outputScale, 0, 0]  // Apply scale transformation
-                };
+                    // Append canvas to the viewer
+                    pdfViewer.appendChild(canvas);
 
-                const renderTask = page.render(renderContext);
-                renderTask.promise.then(function () {
-                    pageRendering = false;
-                    if (pageNumPending !== null) {
-                        renderPage(pageNumPending);
-                        pageNumPending = null;
-                    }
+                    // Render the page into the canvas
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
                 });
-            });
-
-            document.getElementById('page-num').textContent = num;
-        }
-
-        function queueRenderPage(num) {
-            if (pageRendering) {
-                pageNumPending = num;
-            } else {
-                renderPage(num);
             }
-        }
-
-        function onPrevPage() {
-            if (pageNum <= 1) {
-                return;
-            }
-            pageNum--;
-            queueRenderPage(pageNum);
-        }
-
-        function onNextPage() {
-            if (pageNum >= pdfDoc.numPages) {
-                return;
-            }
-            pageNum++;
-            queueRenderPage(pageNum);
-        }
-
-        document.getElementById('prev-page').addEventListener('click', onPrevPage);
-        document.getElementById('next-page').addEventListener('click', onNextPage);
-
-        pdfjsLib.getDocument(pdfUrl).promise.then(function(pdfDoc_) {
-            pdfDoc = pdfDoc_;
-            document.getElementById('page-count').textContent = pdfDoc.numPages;
-            renderPage(pageNum);
+        }, function (reason) {
+            console.error(reason);
         });
     </script>
 </body>
-
 </html>
