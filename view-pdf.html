@@ -54,13 +54,13 @@
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
 
-                    // Fixed scale to ensure consistent rendering without cutting off the page
-                    const scale = 1.2;
+                    // Adjust the scale and viewport size to fix clipping issues
+                    const scale = 1.5; // Adjust as needed
                     const viewport = page.getViewport({ scale: scale });
 
                     // Set canvas size to match the viewport
                     canvas.width = viewport.width;
-                    canvas.height = viewport.height;
+                    canvas.height = viewport.height + 20; // Adding extra height to prevent cut-off
 
                     page.render({
                         canvasContext: context,
