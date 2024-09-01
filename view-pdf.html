@@ -27,109 +27,51 @@
             border: 1px solid #ddd; /* Optional: Add a light border */
             display: flex;
             flex-direction: column;
-            align-items: center;
-            background-color: white;
-            --viewer-pdf-sidenav-width:200px
+            --viewer-pdf-sidenav-width:300px;
         }
 
         #pdfViewer canvas {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        .controls button {
-            margin: 0 5px;
-            padding: 5px 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .controls button:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div id="pdfViewer">
-        <div class="controls" id="zoomControls" style="display: none;">
-            <button id="zoomIn">Zoom In</button>
-            <button id="zoomOut">Zoom Out</button>
-        </div>
-    </div> <!-- PDF Viewer Container -->
+    <div id="pdfViewer"></div> <!-- PDF Viewer Container -->
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const pdfUrl = urlParams.get('url');
-        let currentScale = 1; // Default scale
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); // Detect if the device is mobile
 
         if (pdfUrl) {
             const pdfViewer = document.getElementById('pdfViewer');
-            const zoomControls = document.getElementById('zoomControls');
-
-            // Show zoom controls only if not on a mobile device
-            if (!isMobile) {
-                zoomControls.style.display = 'flex';
-            } else {
-                // Allow pinch-to-zoom on mobile
-                document.body.style.overflow = 'auto';
-                pdfViewer.style.overflow = 'auto';
-            }
 
             // Loading the PDF.js library
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
 
             // Fetch the PDF
             pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-                const initialScale = isMobile ? 1 : currentScale; // Set scale based on device type
-                renderPDF(pdf, initialScale);
+                // Loop through each page and render it
+                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+                    pdf.getPage(pageNumber).then(page => {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
 
-                if (!isMobile) { // Only add zoom functionality for desktop
-                    document.getElementById('zoomIn').addEventListener('click', () => {
-                        currentScale += 0.2;
-                        renderPDF(pdf, currentScale);
-                    });
+                        const viewport = page.getViewport({ scale: 1.5 });
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
 
-                    document.getElementById('zoomOut').addEventListener('click', () => {
-                        currentScale = Math.max(currentScale - 0.2, 0.5);
-                        renderPDF(pdf, currentScale);
+                        page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                            pdfViewer.appendChild(canvas);
+                        });
                     });
                 }
             });
         } else {
             document.body.innerHTML = "<p>No PDF URL provided!</p>";
         }
-
-        function renderPDF(pdf, scale) {
-            // Clear previous canvases
-            const canvases = document.querySelectorAll('#pdfViewer canvas');
-            canvases.forEach(canvas => canvas.remove());
-
-            // Loop through each page and render it
-            for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-                pdf.getPage(pageNumber).then(page => {
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-
-                    const viewport = page.getViewport({ scale: scale });
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
-                        pdfViewer.appendChild(canvas);
-                    });
-                });
-            }
-        }
     </script>
 </body>
 </html>
+
 
