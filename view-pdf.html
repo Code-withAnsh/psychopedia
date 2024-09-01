@@ -21,14 +21,17 @@
         }
 
         #pdfViewer {
-            width: 80%; /* Adjust the width */
-            height: 90%; /* Adjust the height */
+            width: 100%; /* Adjust the width */
+            height: 100%; /* Adjust the height */
             overflow: auto; /* Allow scrolling inside viewer */
             border: 1px solid #ddd; /* Optional: Add a light border */
+            display: flex;
+            flex-direction: column;
+            --viewer-pdf-sidenav-width:300px;
         }
 
         #pdfViewer canvas {
-            margin-bottom: 20px;
+            margin-bottom: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
     </style>
