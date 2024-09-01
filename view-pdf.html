@@ -27,7 +27,6 @@
             border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
         #pdfViewer canvas {
@@ -61,7 +60,7 @@
 
                     // Add extra buffer for canvas height
                     canvas.width = viewport.width;
-                    canvas.height = viewport.height + 60; // Extra buffer to ensure no content is cut off
+                    canvas.height = viewport.height + 100; // Increased buffer height to ensure no content is cut off
 
                     page.render({
                         canvasContext: context,
@@ -101,6 +100,7 @@
     </script>
 </body>
 </html>
+
 
 
 
