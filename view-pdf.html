@@ -54,11 +54,24 @@
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
 
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
+                    // Set scale for better quality and prevent content cutoff
+                    const scale = 1.5;
+                    const viewport = page.getViewport({ scale: scale });
 
-                    page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                    // Adjust canvas size considering device pixel ratio
+                    const outputScale = window.devicePixelRatio || 1;
+                    canvas.width = Math.floor(viewport.width * outputScale);
+                    canvas.height = Math.floor(viewport.height * outputScale);
+                    canvas.style.width = Math.floor(viewport.width) + 'px';
+                    canvas.style.height = Math.floor(viewport.height) + 'px';
+
+                    const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+                    page.render({
+                        canvasContext: context,
+                        transform: transform,
+                        viewport: viewport
+                    }).promise.then(() => {
                         pdfViewer.appendChild(canvas);
                         // Render the next page
                         if (pageNumber < pdf.numPages) {
@@ -87,5 +100,3 @@
     </script>
 </body>
 </html>
-
-
