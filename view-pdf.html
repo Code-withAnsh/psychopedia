@@ -1,76 +1,4 @@
-[9:54 am, 01/09/2024] Shivmani Singh: <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View PDF</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
-    <style>
-        #pdf-viewer {
-            width: 100%;
-            max-width: 800px;
-            margin: auto;
-            overflow-y: auto;
-            height: 90vh; /* Make sure it's scrollable */
-            border: 1px solid #ccc;
-            background: #eee;
-            padding: 10px;
-        }
-
-        .pdf-page {
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            background-color: white;
-        }
-    </style>
-</head>
-<body>
-    <h1 style="text-align: center;">View PDF</h1>
-    <div id="pdf-viewer"></div>
-
-    <script>
-        // PDF.js setup
-        const urlParams = new URLSearchParams(window.location.search);
-        const pdfUrl = urlParams.get('url');
-
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
-
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-
-        // Load the PDF
-        loadingTask.promise.then(function(pdf) {
-            const pdfViewer = document.getElementById('pdf-viewer');
-
-            // Loop through each page and render it
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                pdf.getPage(pageNum).then(function(page) {
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.classList.add('pdf-page');
-
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    // Append canvas to the viewer
-                    pdfViewer.appendChild(canvas);
-
-                    // Render the page into the canvas
-                    const renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-                    page.render(renderContext);
-                });
-            }
-        }, function (reason) {
-            console.error(reason);
-        });
-    </script>
-</body>
-</html>
-[10:04 am, 01/09/2024] Shivmani Singh: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -106,6 +34,8 @@
         #pdf-canvas {
             border: 1px solid #000; /* Border for canvas */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+            width: 100%; /* Adjust width to fit screen */
+            height: auto; /* Maintain aspect ratio */
         }
     </style>
 </head>
@@ -132,18 +62,23 @@
         let pdfDoc = null;
         let pageNum = 1; // Starting page number
 
-        // Render PDF page
+        // Render PDF page with dynamic scaling
         function renderPage(pageNum) {
             pdfDoc.getPage(pageNum).then(function (page) {
-                const viewport = page.getViewport({ scale: 1.5 }); // Adjust scale as needed
+                const viewport = page.getViewport({ scale: 1 }); // Base scale for responsive rendering
                 const canvas = document.getElementById('pdf-canvas');
                 const context = canvas.getContext('2d');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
+
+                // Calculate scale based on screen width
+                const scale = (window.innerWidth / viewport.width) * 0.9; // 90% of screen width
+                const scaledViewport = page.getViewport({ scale: scale });
+                
+                canvas.width = scaledViewport.width;
+                canvas.height = scaledViewport.height;
 
                 const renderContext = {
                     canvasContext: context,
-                    viewport: viewport,
+                    viewport: scaledViewport,
                 };
 
                 page.render(renderContext);
