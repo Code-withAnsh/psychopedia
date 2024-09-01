@@ -27,6 +27,7 @@
             border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         #pdfViewer canvas {
@@ -55,18 +56,23 @@
                     const context = canvas.getContext('2d');
 
                     // Dynamically adjust scale and viewport
-                    const scale = 1.5; // Adjust as needed
+                    const scale = 1.5; // Adjust scale if needed
                     const viewport = page.getViewport({ scale: scale });
 
-                    // Set canvas size to match the viewport with additional buffer
+                    // Add extra buffer for canvas height
                     canvas.width = viewport.width;
-                    canvas.height = viewport.height + 60; // Adding more buffer height to prevent cut-off
+                    canvas.height = viewport.height + 60; // Extra buffer to ensure no content is cut off
 
                     page.render({
                         canvasContext: context,
                         viewport: viewport
                     }).promise.then(() => {
                         pdfViewer.appendChild(canvas);
+
+                        // Adjusting scroll position for last page
+                        if (pageNumber === pdf.numPages) {
+                            pdfViewer.scrollTop = pdfViewer.scrollHeight;
+                        }
 
                         // Render the next page
                         if (pageNumber < pdf.numPages) {
@@ -95,5 +101,6 @@
     </script>
 </body>
 </html>
+
 
 
