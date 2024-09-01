@@ -54,19 +54,20 @@
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
 
-                    // Adjust the scale as needed
-                    const scale = 1.5;
+                    // Fixed scale to ensure consistent rendering without cutting off the page
+                    const scale = 1.2;
                     const viewport = page.getViewport({ scale: scale });
 
-                    // Set canvas size to match the viewport and add some padding for safety
+                    // Set canvas size to match the viewport
                     canvas.width = viewport.width;
-                    canvas.height = viewport.height + 10; // Adding extra 10 pixels to prevent cut-off
+                    canvas.height = viewport.height;
 
                     page.render({
                         canvasContext: context,
                         viewport: viewport
                     }).promise.then(() => {
                         pdfViewer.appendChild(canvas);
+
                         // Render the next page
                         if (pageNumber < pdf.numPages) {
                             renderPage(pdf, pageNumber + 1);
@@ -94,3 +95,4 @@
     </script>
 </body>
 </html>
+
