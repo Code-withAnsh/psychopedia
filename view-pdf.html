@@ -5,98 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View PDF</title>
     <style>
-        /* CSS for PDF Viewer */
-        body {
+        body, html {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Hide body scroll */
-            font-family: Arial, sans-serif;
-        }
-
-        #pdf-viewer {
             width: 100%;
-            height: 100vh; /* Full viewport height */
-            overflow: auto; /* Scroll enabled */
-            background-color: #f0f0f0; /* Background color */
-            display: flex; /* Flexbox for centering */
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
+            height: 100%;
+            overflow: hidden; /* Remove scrolling from the main page */
         }
 
-        #canvas-container {
-            width: 90%; /* Adjust width to fit */
-            max-height: 100%; /* Responsive height */
-            overflow: auto; /* Scroll enabled */
-            background-color: white; /* Background for PDF */
-            padding: 10px; /* Padding around PDF */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
-        }
-
-        #pdf-canvas {
-            display: block; /* Block element */
-            margin: 0 auto; /* Center horizontally */
-            max-width: 100%; /* Responsive width */
-            height: auto; /* Maintain aspect ratio */
+        #pdfViewer {
+            width: 100%;
+            height: 100%;
+            border: none; /* Remove border from iframe */
         }
     </style>
 </head>
 <body>
-
-    <!-- HTML Structure for PDF Viewer -->
-    <div id="pdf-viewer">
-        <div id="canvas-container">
-            <canvas id="pdf-canvas"></canvas>
-        </div>
-    </div>
-
-    <!-- PDF.js Library -->
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <iframe id="pdfViewer"></iframe>
 
     <script>
-        // JavaScript to handle PDF rendering and responsiveness
+        // Get the PDF URL from the query parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const url = urlParams.get('url'); // PDF URL from query parameter
+        const pdfUrl = urlParams.get('url');
 
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
-
-        let pdfDoc = null;
-        let pageNum = 1; // Starting page number
-
-        // Render PDF page with fixed scaling for better view
-        function renderPage(pageNum) {
-            pdfDoc.getPage(pageNum).then(function (page) {
-                const viewport = page.getViewport({ scale: 1.5 }); // Fixed scale for better view
-                const canvas = document.getElementById('pdf-canvas');
-                const context = canvas.getContext('2d');
-
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport,
-                };
-
-                page.render(renderContext);
-            });
-        }
-
-        // Load PDF
-        function loadPDF() {
-            pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
-                pdfDoc = pdfDoc_;
-                renderPage(pageNum); // Render the first page
-            }).catch(function (error) {
-                console.error('Error loading PDF:', error);
-            });
-        }
-
-        // Initialize PDF Loading
-        if (url) {
-            loadPDF();
+        if (pdfUrl) {
+            // Set the source of the iframe to the PDF URL
+            document.getElementById('pdfViewer').src = pdfUrl;
         } else {
-            console.error('No PDF URL provided!');
+            // If no URL is provided, show an error message
+            document.body.innerHTML = "<p>No PDF URL provided!</p>";
         }
     </script>
 </body>
