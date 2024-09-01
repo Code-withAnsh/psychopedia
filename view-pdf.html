@@ -55,12 +55,12 @@
                     const context = canvas.getContext('2d');
 
                     // Dynamically adjust scale and viewport
-                    const scale = 1.5; // Adjust this as needed
+                    const scale = 1.5; // Adjust as needed
                     const viewport = page.getViewport({ scale: scale });
 
-                    // Set canvas size to match the viewport
+                    // Set canvas size to match the viewport with additional buffer
                     canvas.width = viewport.width;
-                    canvas.height = viewport.height + 40; // Adding extra buffer height
+                    canvas.height = viewport.height + 60; // Adding more buffer height to prevent cut-off
 
                     page.render({
                         canvasContext: context,
