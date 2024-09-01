@@ -5,18 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BA Psychology Online Library</title>
-    <link rel="stylesheet" href=>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-image: url('pexels-pixabay-355465.jpg'); /* Replace with your background image URL */
-             background-repeat: no-repeat;
-    background-position: center;
-    background-attachment: fixed;
-    background-size: cover;
-            
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed;
+            background-size: cover;
         }
 
         header {
@@ -65,7 +63,7 @@
             margin: 0;
             padding: 15px;
             font-size: 1.8em;
-            background-color: #4CAF50 ;
+            background-color: #4CAF50;
             color: white;
         }
 
@@ -98,6 +96,19 @@
             text-shadow: 1px 1px 2px black; /* Text shadow for better visibility */
             position: relative;
         }
+
+        /* Add the Media Query Here */
+        @media (max-width: 768px) {
+            .grid {
+                flex-direction: column; /* Stacks the cards vertically */
+                align-items: center; /* Centers the cards */
+            }
+
+            .year-card {
+                width: 90%; /* Adjust width for mobile */
+                margin: 10px 0; /* Add vertical margin for spacing */
+            }
+        }
     </style>
 </head>
 <body>
@@ -116,7 +127,7 @@
 
             <!-- 2nd Year -->
             <div class="year-card">
-                <img src="WhatsApp Image 2024-08-30 at 11.55.39 PM.jpeg"> <!-- Replace with actual image URL -->
+                <img src="WhatsApp Image 2024-08-30 at 11.55.39 PM.jpeg" alt="2nd Year Image"> <!-- Replace with actual image URL -->
                 <h2>2nd Year</h2>
                 <a href="2nd-year.html">Explore 2nd Year</a>
             </div>
@@ -136,4 +147,5 @@
     </div>
 </body>
 </html>
+
 
