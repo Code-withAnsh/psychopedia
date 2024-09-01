@@ -4,35 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View PDF</title>
+
+    <!-- Include PDF.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+
     <style>
-        body, html {
+        body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
             overflow: hidden; /* Remove scrolling from the main page */
         }
 
         #pdfViewer {
-            width: 100%;
-            height: 100%;
-            border: none; /* Remove border from iframe */
+            width: 80%; /* Adjust the width */
+            height: 90%; /* Adjust the height */
+            overflow: auto; /* Allow scrolling inside viewer */
+            border: 1px solid #ddd; /* Optional: Add a light border */
+        }
+
+        #pdfViewer canvas {
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-    <iframe id="pdfViewer"></iframe>
+    <div id="pdfViewer"></div> <!-- PDF Viewer Container -->
 
     <script>
-        // Get the PDF URL from the query parameter
         const urlParams = new URLSearchParams(window.location.search);
         const pdfUrl = urlParams.get('url');
 
         if (pdfUrl) {
-            // Set the source of the iframe to the PDF URL
-            document.getElementById('pdfViewer').src = pdfUrl;
+            const pdfViewer = document.getElementById('pdfViewer');
+
+            // Loading the PDF.js library
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+
+            // Fetch the PDF
+            pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+                // Loop through each page and render it
+                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+                    pdf.getPage(pageNumber).then(page => {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+
+                        const viewport = page.getViewport({ scale: 1.5 });
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                            pdfViewer.appendChild(canvas);
+                        });
+                    });
+                }
+            });
         } else {
-            // If no URL is provided, show an error message
             document.body.innerHTML = "<p>No PDF URL provided!</p>";
         }
     </script>
