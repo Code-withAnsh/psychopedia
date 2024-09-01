@@ -21,13 +21,12 @@
         }
 
         #pdfViewer {
-            width: 100%; /* Adjust the width */
-            height: 100%; /* Adjust the height */
+            width: 100%;
+            height: 100%;
             overflow: auto; /* Allow scrolling inside viewer */
-            border: 1px solid #ddd; /* Optional: Add a light border */
+            border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
-            --viewer-pdf-sidenav-width:300px;
         }
 
         #pdfViewer canvas {
@@ -49,23 +48,38 @@
             // Loading the PDF.js library
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
 
-            // Fetch the PDF
-            pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-                // Loop through each page and render it
-                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-                    pdf.getPage(pageNumber).then(page => {
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
+            // Function to render a single page
+            function renderPage(pdf, pageNumber) {
+                pdf.getPage(pageNumber).then(page => {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
 
-                        const viewport = page.getViewport({ scale: 1.5 });
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-                        page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
-                            pdfViewer.appendChild(canvas);
-                        });
+                    page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                        pdfViewer.appendChild(canvas);
+                        // Render the next page
+                        if (pageNumber < pdf.numPages) {
+                            renderPage(pdf, pageNumber + 1);
+                        }
+                    }).catch(error => {
+                        console.error(`Error rendering page ${pageNumber}:`, error);
                     });
+                }).catch(error => {
+                    console.error(`Error getting page ${pageNumber}:`, error);
+                });
+            }
+
+            // Fetch the PDF and render pages sequentially
+            pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+                if (pdf.numPages > 0) {
+                    renderPage(pdf, 1); // Start rendering from the first page
                 }
+            }).catch(error => {
+                console.error('Error loading PDF:', error);
+                document.body.innerHTML = "<p>Failed to load PDF. Please check the URL or try again later.</p>";
             });
         } else {
             document.body.innerHTML = "<p>No PDF URL provided!</p>";
