@@ -9,32 +9,33 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: hidden; /* Hide body scroll */
             font-family: Arial, sans-serif;
         }
 
         #pdf-viewer {
             width: 100%;
-            height: 100vh;
-            overflow: auto; /* Scrolling enabled */
+            height: 100vh; /* Full viewport height */
+            overflow: auto; /* Scroll enabled */
+            background-color: #f0f0f0; /* Background color */
             display: flex; /* Flexbox for centering */
             justify-content: center; /* Center horizontally */
             align-items: center; /* Center vertically */
-            background-color: #f0f0f0; /* Background color */
         }
 
         #canvas-container {
-            max-width: 100%; /* Responsive width */
+            width: 90%; /* Adjust width to fit */
             max-height: 100%; /* Responsive height */
             overflow: auto; /* Scroll enabled */
-            display: block; /* Block element */
-            margin: 0 auto; /* Center horizontally */
+            background-color: white; /* Background for PDF */
+            padding: 10px; /* Padding around PDF */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
         }
 
         #pdf-canvas {
-            border: 1px solid #000; /* Border for canvas */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
-            width: 100%; /* Adjust width to fit screen */
+            display: block; /* Block element */
+            margin: 0 auto; /* Center horizontally */
+            max-width: 100%; /* Responsive width */
             height: auto; /* Maintain aspect ratio */
         }
     </style>
@@ -62,23 +63,19 @@
         let pdfDoc = null;
         let pageNum = 1; // Starting page number
 
-        // Render PDF page with dynamic scaling
+        // Render PDF page with fixed scaling for better view
         function renderPage(pageNum) {
             pdfDoc.getPage(pageNum).then(function (page) {
-                const viewport = page.getViewport({ scale: 1 }); // Base scale for responsive rendering
+                const viewport = page.getViewport({ scale: 1.5 }); // Fixed scale for better view
                 const canvas = document.getElementById('pdf-canvas');
                 const context = canvas.getContext('2d');
 
-                // Calculate scale based on screen width
-                const scale = (window.innerWidth / viewport.width) * 0.9; // 90% of screen width
-                const scaledViewport = page.getViewport({ scale: scale });
-                
-                canvas.width = scaledViewport.width;
-                canvas.height = scaledViewport.height;
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
 
                 const renderContext = {
                     canvasContext: context,
-                    viewport: scaledViewport,
+                    viewport: viewport,
                 };
 
                 page.render(renderContext);
