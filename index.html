@@ -7,9 +7,10 @@
     <title>BA Psychology Online Library</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif; /* Updated Font Style */
             margin: 0;
             padding: 0;
+            background-color: #0073e6; /* Blue background for the website */
             background-image: url('pexels-pixabay-355465.jpg'); /* Replace with your background image URL */
             background-repeat: no-repeat;
             background-position: center;
@@ -109,41 +110,61 @@
             }
         }
 
-        /* Popup Card Styles */
+        /* Enhanced Popup Card Styles */
         .popup-card {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transform: translate(-50%, -50%) scale(0);
+            width: 350px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f9f9f9, #e6e6e6); /* Light grey background */
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             z-index: 1000;
-            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .popup-card.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
 
         .popup-card h2 {
             margin: 0;
-            font-size: 1.5em;
-            margin-bottom: 15px;
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #333;
+            font-family: 'Poppins', sans-serif; /* Updated Font Style */
         }
 
         .popup-card p {
             margin: 10px 0;
-            font-size: 1em;
+            font-size: 1.2em;
+            color: #555;
+            font-family: 'Poppins', sans-serif; /* Updated Font Style */
         }
 
         .popup-card .close-btn {
             position: absolute;
             top: 10px;
             right: 10px;
-            background-color: transparent;
+            background: #ff4b5c;
             border: none;
-            font-size: 1.2em;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 1.4em;
+            color: white;
             cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .popup-card .close-btn:hover {
+            transform: rotate(90deg);
+            background-color: #ff1c39;
         }
 
         .overlay {
@@ -152,9 +173,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             z-index: 999;
-            display: none; /* Hidden by default */
+            display: none;
+        }
+
+        .overlay.show {
+            display: block;
         }
     </style>
 </head>
@@ -168,7 +193,7 @@
     </div>
 
     <header>
-        <h1>Welcome to BA Psychology Online Library</h1>
+        <h1>Welcome to  Psycho world</h1>
     </header>
     <main class="container">
         <!-- Year Selection -->
@@ -202,16 +227,16 @@
     </div>
 
     <script>
-        // Show the popup card when the page loads
+        // Show the popup card with animation when the page loads
         window.onload = function() {
-            document.getElementById('popupCard').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popupCard').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
         };
 
-        // Close the popup card
+        // Close the popup card with animation
         function closePopup() {
-            document.getElementById('popupCard').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popupCard').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
         }
     </script>
 </body>
